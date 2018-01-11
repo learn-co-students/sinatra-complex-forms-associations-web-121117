@@ -1,26 +1,44 @@
+require 'pry'
 class PetsController < ApplicationController
 
   get '/pets' do
     @pets = Pet.all
-    erb :'/pets/index' 
+    erb :'/pets/index'
   end
 
-  get '/pets/new' do 
+  get '/pets/new' do
+    @owners = Owner.all
     erb :'/pets/new'
   end
 
-  post '/pets' do 
-
-    redirect to "pets/#{@pet.id}"
+  post '/pets' do
+    @pet = Pet.create(params[:pet])
+    if !params[:owner][:name].empty?
+      @new  = Owner.create(params[:owner])
+      @new.pets << @pet
+    end
+    redirect to "/pets/#{@pet.id}"
   end
 
-  get '/pets/:id' do 
+  get '/pets/:id/edit' do
     @pet = Pet.find(params[:id])
+    erb :"/pets/edit"
+  end
+
+  get '/pets/:id' do
+    @pet = Pet.find(params[:id])
+    @owner = @pet.owner
     erb :'/pets/show'
   end
 
-  post '/pets/:id' do 
-
+  post '/pets/:id' do
+    @pet = Pet.find(params[:id])
+    @pet.update(params[:pet])
+    # binding.pry
+    if !params[:owner][:name].empty?
+      @new  = Owner.create(params[:owner])
+      @new.pets << @pet
+    end
     redirect to "pets/#{@pet.id}"
   end
 end
